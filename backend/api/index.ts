@@ -1,104 +1,58 @@
-import express, { Request, Response, NextFunction } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import cookieParser from 'cookie-parser';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import mongoose from 'mongoose';
 
-// Import routes
-import authRoutes from './routes/auth';
-import customerRoutes from './routes/customers';
-import technicianRoutes from './routes/technicians';
-import appointmentRoutes from './routes/appointments';
-import serviceRoutes from './routes/services';
-import invoiceRoutes from './routes/invoices';
-import companyRoutes from './routes/companies';
-
-const app = express();
-
-// Body parser
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
-// CORS
-app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  credentials: true
-}));
-
-// Security
-app.use(helmet());
-app.use(compression());
-
-// Connect to MongoDB (serverless-friendly)
+// Cache da conexão MongoDB
 let cachedDb: any = null;
+
 async function connectToDatabase() {
   if (cachedDb && mongoose.connection.readyState === 1) {
     return cachedDb;
   }
 
-  const mongoUri = process.env.MONGODB_URI || '';
+  const mongoUri = process.env.MONGODB_URI;
   
   if (!mongoUri) {
     throw new Error('MONGODB_URI não configurado');
   }
 
-  const conn = await mongoose.connect(mongoUri);
-  cachedDb = conn;
-  console.log('MongoDB Connected');
-  return cachedDb;
+  try {
+    const conn = await mongoose.connect(mongoUri, {
+      bufferCommands: false,
+    });
+    cachedDb = conn;
+    console.log('MongoDB Connected');
+    return cachedDb;
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw error;
+  }
 }
 
-// Mount routers
-app.use('/api/auth', authRoutes);
-app.use('/api/customers', customerRoutes);
-app.use('/api/technicians', technicianRoutes);
-app.use('/api/appointments', appointmentRoutes);
-app.use('/api/services', serviceRoutes);
-app.use('/api/invoices', invoiceRoutes);
-app.use('/api/companies', companyRoutes);
-
-// Health check
-app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date() });
-});
-
-app.get('/', (req: Request, res: Response) => {
-  res.status(200).json({ 
-    message: 'ServiceFlow Pro API',
-    status: 'online',
-    version: '1.0.0'
-  });
-});
-
-// Error handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(err.statusCode || 500).json({
-    success: false,
-    message: err.message || 'Server Error'
-  });
-});
-
-// Serverless handler
-export default async (req: Request, res: Response) => {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    // Conectar ao banco
     await connectToDatabase();
+
+    // Health check
+    if (req.url === '/health' || req.url === '/') {
+      return res.status(200).json({ 
+        status: 'OK',
+        message: 'ServiceFlow Pro API',
+        timestamp: new Date(),
+        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+      });
+    }
+
+    // Importar e usar o app Express apenas quando necessário
+    const { default: app } = await import('../src/server');
     return app(req, res);
-  } catch (error) {
-    console.error('Database connection error:', error);
+
+  } catch (error: any) {
+    console.error('Handler error:', error);
     return res.status(500).json({ 
       success: false, 
-      message: 'Database connection failed' 
+      message: error.message || 'Internal Server Error',
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
-};
-
-// Local server
-if (process.env.VERCEL !== '1') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
 }
