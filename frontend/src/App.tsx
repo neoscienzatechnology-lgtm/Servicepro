@@ -17,7 +17,10 @@ import Services from './pages/Services'
 import Settings from './pages/Settings'
 
 function App() {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
+  
+  console.log('🔍 App - isAuthenticated:', isAuthenticated)
+  console.log('👤 App - user:', user)
 
   return (
     <>
