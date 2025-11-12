@@ -24,7 +24,20 @@ app.use(cookieParser());
 
 // Enable CORS
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Allow requests from Vercel preview URLs and production
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://serviceflow-frontend-nine.vercel.app'
+    ];
+    
+    // Allow all Vercel preview URLs
+    if (!origin || allowedOrigins.includes(origin) || origin.includes('vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
