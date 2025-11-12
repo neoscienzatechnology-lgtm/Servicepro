@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { FileText, Plus, X, Download, DollarSign, CheckCircle } from 'lucide-react'
+import { FileText, Plus, X, Download, CheckCircle } from 'lucide-react'
 import api from '../services/api'
 import { toast } from 'react-hot-toast'
 import jsPDF from 'jspdf'

@@ -22,7 +22,7 @@ interface Appointment {
 
 export default function Appointments() {
   const [showModal, setShowModal] = useState(false)
-  const [selectedDate, setSelectedDate] = useState('')
+  // const [selectedDate, setSelectedDate] = useState('')
   const [formData, setFormData] = useState({
     customerId: '',
     technicianId: '',

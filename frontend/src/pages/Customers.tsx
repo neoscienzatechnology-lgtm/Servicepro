@@ -13,7 +13,7 @@ export default function Customers() {
   })
   
   const queryClient = useQueryClient()
-  const { data: customersData, isLoading } = useQuery({
+  const { data: customersData } = useQuery({
     queryKey: ['customers'],
     queryFn: async () => (await api.get('/customers')).data
   })
