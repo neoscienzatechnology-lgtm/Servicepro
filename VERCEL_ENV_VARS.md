@@ -5,11 +5,11 @@
 Copie e cole estas variáveis no Vercel Dashboard > Settings > Environment Variables:
 
 ```
-MONGODB_URI=mongodb+srv://neoscienzatechnology_db_user:XGnzM86XgbT4EoCR@cluster0.mongodb.net/serviceflow?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://neoscienzatechnology_db_user:XGnzM86XgbT4EoCR@cluster0.nbf3odo.mongodb.net/serviceflow?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=serviceflow_pro_super_secret_jwt_key_2024_change_in_production
 JWT_EXPIRE=30d
 NODE_ENV=production
-FRONTEND_URL=https://serviceflow-pro.vercel.app
+FRONTEND_URL=https://serviceflow-frontend-bv1fleko1.vercel.app
 ```
 
 **IMPORTANTE:** Após obter a URL do frontend no Vercel, atualize `FRONTEND_URL` com a URL correta.
