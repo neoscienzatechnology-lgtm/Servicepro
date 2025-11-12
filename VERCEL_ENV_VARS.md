@@ -5,7 +5,7 @@
 Copie e cole estas variáveis no Vercel Dashboard > Settings > Environment Variables:
 
 ```
-MONGODB_URI=mongodb+srv://admin:XGnzM86XgbT4EoCR@cluster0.mongodb.net/serviceflow?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://neoscienzatechnology_db_user:XGnzM86XgbT4EoCR@cluster0.mongodb.net/serviceflow?retryWrites=true&w=majority
 JWT_SECRET=serviceflow_pro_super_secret_jwt_key_2024_change_in_production
 JWT_EXPIRE=30d
 NODE_ENV=production
@@ -53,12 +53,7 @@ Isso permite que o Vercel acesse seu banco de dados.
 ## Connection String Atual
 
 ```
-mongodb+srv://admin:XGnzM86XgbT4EoCR@cluster0.mongodb.net/serviceflow?retryWrites=true&w=majority
+mongodb+srv://neoscienzatechnology_db_user:XGnzM86XgbT4EoCR@cluster0.mongodb.net/serviceflow?retryWrites=true&w=majority
 ```
 
-**Se o usuário for diferente de `admin`**, atualize a string substituindo `admin` pelo seu usuário real.
-
-Exemplo:
-```
-mongodb+srv://SEUURUSARIO:XGnzM86XgbT4EoCR@clusterXXX.xxxxx.mongodb.net/serviceflow?retryWrites=true&w=majority
-```
+**Se o cluster for diferente**, atualize `cluster0` pelo nome do seu cluster no Atlas.

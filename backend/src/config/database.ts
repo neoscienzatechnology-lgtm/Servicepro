@@ -2,8 +2,15 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 let mongoServer: MongoMemoryServer | null = null;
+let isConnected = false;
 
 const connectDB = async () => {
+  // Se já estiver conectado, não reconecta
+  if (isConnected && mongoose.connection.readyState === 1) {
+    console.log('✅ MongoDB já conectado');
+    return;
+  }
+
   try {
     let mongoUri = process.env.MONGODB_URI!;
 
@@ -17,10 +24,12 @@ const connectDB = async () => {
     
     const conn = await mongoose.connect(mongoUri);
     
+    isConnected = true;
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     console.log(`📊 Database: ${conn.connection.name}`);
   } catch (error: any) {
     console.error(`❌ Error: ${error.message}`);
+    isConnected = false;
     process.exit(1);
   }
 };
