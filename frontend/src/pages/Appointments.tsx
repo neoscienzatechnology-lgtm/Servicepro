@@ -97,7 +97,7 @@ export default function Appointments() {
   }))
 
   const handleDateClick = (info: any) => {
-    setSelectedDate(info.dateStr)
+    // setSelectedDate(info.dateStr)
     setFormData({ ...formData, scheduledDate: info.dateStr })
     setShowModal(true)
   }
