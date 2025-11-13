@@ -33,9 +33,8 @@ export const getInvoices = async (req: AuthRequest, res: Response) => {
     console.log('💰 Query filter:', JSON.stringify(query));
 
     const invoices = await Invoice.find(query)
-      .populate('customer', 'firstName lastName email')
-      .populate('appointment')
-      .sort({ issueDate: -1 });
+      .sort({ issueDate: -1 })
+      .lean(); // Usar lean() para retornar objetos simples
 
     console.log('💰 Found invoices:', invoices.length);
 

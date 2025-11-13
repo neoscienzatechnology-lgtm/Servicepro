@@ -38,11 +38,11 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
       if (endDate) query.scheduledDate.$lte = new Date(endDate as string);
     }
 
+    // Buscar appointments sem populate primeiro para evitar erros
+    console.log('📅 Fetching appointments...');
     const appointments = await Appointment.find(query)
-      .populate('customer', 'firstName lastName email phone')
-      .populate('technician', 'firstName lastName email phone')
-      .populate('service', 'name category basePrice')
-      .sort({ scheduledDate: 1, scheduledStartTime: 1 });
+      .sort({ scheduledDate: 1, scheduledStartTime: 1 })
+      .lean(); // Usar lean() para retornar objetos JavaScript simples
 
     console.log('📅 Found appointments:', appointments.length);
 
@@ -53,9 +53,11 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
     });
   } catch (error: any) {
     console.error('❌ Error in getAppointments:', error);
+    console.error('❌ Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };

@@ -26,17 +26,17 @@ export const getCustomers = async (req: AuthRequest, res: Response) => {
     if (tags) query.tags = { $in: (tags as string).split(',') };
     if (search) {
       query.$or = [
-        { 'user.firstName': { $regex: search, $options: 'i' } },
-        { 'user.lastName': { $regex: search, $options: 'i' } },
-        { 'user.email': { $regex: search, $options: 'i' } }
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
       ];
     }
 
     console.log('👥 Query filter:', JSON.stringify(query));
 
     const customers = await Customer.find(query)
-      .populate('user', 'firstName lastName email phone avatar')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean(); // Usar lean() para retornar objetos simples
 
     console.log('👥 Found customers:', customers.length);
 
