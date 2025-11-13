@@ -29,16 +29,24 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       login: async (email: string, password: string) => {
-        console.log('🔐 Iniciando login...')
-        const response = await api.post('/auth/login', { email, password })
+        console.log('🔐 Iniciando login com NOVO endpoint de debug...')
+        
+        // PRIMEIRO: Limpar TUDO
+        localStorage.clear()
+        console.log('🧹 localStorage limpo completamente')
+        
+        // USAR ENDPOINT DE DEBUG que gera token NOVO garantido
+        const response = await api.post('/auth/debug-login', { email, password })
         console.log('✅ Resposta do servidor:', response.data)
         const { token, user } = response.data
         
+        console.log('🔑 Novo token recebido:', token.substring(0, 50) + '...')
+        
         localStorage.setItem('token', token)
-        console.log('💾 Token salvo no localStorage')
+        console.log('💾 Token salvo no localStorage.token')
         
         set({ user, token, isAuthenticated: true })
-        console.log('✅ Estado atualizado - isAuthenticated:', true)
+        console.log('✅ Estado atualizado - isAuthenticated:', true, 'user:', user.email)
       },
 
       register: async (data: any) => {

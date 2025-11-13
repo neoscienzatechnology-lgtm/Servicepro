@@ -39,8 +39,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         status: 'OK',
         message: 'ServiceFlow Pro API',
         timestamp: new Date(),
-        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        jwtSecret: process.env.JWT_SECRET ? `${process.env.JWT_SECRET.substring(0, 10)}...` : 'NOT SET'
       });
+    }
+
+    // Endpoint de debug para FORÇAR novo login e gerar novo token
+    if (req.url === '/api/auth/debug-login' && req.method === 'POST') {
+      const { default: app } = await import('../src/server');
+      return app(req, res);
     }
 
     // Importar e usar o app Express apenas quando necessário
