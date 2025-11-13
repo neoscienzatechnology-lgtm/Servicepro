@@ -15,49 +15,23 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
 
-// ENDPOINT DE DEBUG - FORÇA NOVO LOGIN SEM CACHE
-router.post('/debug-login', async (req, res) => {
+// ENDPOINT DE DEBUG - Same as login but with extra logging and clears old tokens
+router.post('/debug-login', async (req, res, next) => {
   try {
-    const User = (await import('../models/User')).default;
-    const { email, password } = req.body;
-
-    console.log('🔧 DEBUG LOGIN - Email:', email);
+    console.log('🔧 DEBUG LOGIN - Starting...');
     console.log('🔧 DEBUG LOGIN - JWT_SECRET:', process.env.JWT_SECRET);
-
-    const user = await User.findOne({ email }).select('+password');
+    console.log('🔧 DEBUG LOGIN - Email:', req.body.email);
     
-    if (!user) {
-      return res.status(401).json({ message: 'Credenciais inválidas' });
-    }
-
-    const isMatch = await user.matchPassword(password);
+    // Call the regular login function
+    await login(req, res, next);
     
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Credenciais inválidas' });
-    }
-
-    const jwt = await import('jsonwebtoken');
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET || 'mysecret123',
-      { expiresIn: '30d' }
-    );
-
-    console.log('🔧 DEBUG LOGIN - Token gerado:', token.substring(0, 50) + '...');
-
-    res.status(200).json({
-      token,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-      },
-    });
   } catch (error: any) {
     console.error('❌ Erro no debug-login:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: error.message,
+      stack: error.stack
+    });
   }
 });
 

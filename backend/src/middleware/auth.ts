@@ -28,7 +28,9 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
   }
 
   try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+    const secret = process.env.JWT_SECRET || 'mysecret123';
+    console.log('🔑 Verificando token com JWT_SECRET:', secret);
+    const decoded: any = jwt.verify(token, secret);
     console.log('✅ Token verificado, user ID:', decoded.id);
     req.user = await User.findById(decoded.id);
     console.log('✅ Usuário encontrado:', req.user?.email);

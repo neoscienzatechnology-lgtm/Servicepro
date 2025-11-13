@@ -101,7 +101,9 @@ UserSchema.pre('save', async function (next) {
 
 // Sign JWT and return
 UserSchema.methods.getSignedJwtToken = function () {
-  return jwt.sign({ id: this._id }, 'my-secret-key', {
+  const secret = process.env.JWT_SECRET || 'mysecret123';
+  console.log('🔑 Gerando token com JWT_SECRET:', secret);
+  return jwt.sign({ id: this._id }, secret, {
     expiresIn: '30d'
   });
 };
