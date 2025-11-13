@@ -11,9 +11,16 @@ interface AuthRequest extends Request {
 // @access  Private
 export const getCustomers = async (req: AuthRequest, res: Response) => {
   try {
+    console.log('👥 GET Customers - User:', req.user?.email, 'Role:', req.user?.role, 'Company:', req.user?.company);
+    
     const { status, tags, search } = req.query;
     
-    let query: any = { company: req.user?.company };
+    let query: any = {};
+    
+    // Só filtrar por company se existir
+    if (req.user?.company) {
+      query.company = req.user.company;
+    }
 
     if (status) query.status = status;
     if (tags) query.tags = { $in: (tags as string).split(',') };
@@ -25,9 +32,13 @@ export const getCustomers = async (req: AuthRequest, res: Response) => {
       ];
     }
 
+    console.log('👥 Query filter:', JSON.stringify(query));
+
     const customers = await Customer.find(query)
       .populate('user', 'firstName lastName email phone avatar')
       .sort({ createdAt: -1 });
+
+    console.log('👥 Found customers:', customers.length);
 
     res.status(200).json({
       success: true,
@@ -35,6 +46,7 @@ export const getCustomers = async (req: AuthRequest, res: Response) => {
       data: customers
     });
   } catch (error: any) {
+    console.error('❌ Error in getCustomers:', error);
     res.status(500).json({
       success: false,
       message: error.message

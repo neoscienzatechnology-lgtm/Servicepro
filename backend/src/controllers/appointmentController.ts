@@ -11,18 +11,22 @@ interface AuthRequest extends Request {
 // @access  Private
 export const getAppointments = async (req: AuthRequest, res: Response) => {
   try {
+    console.log('📅 GET Appointments - User:', req.user?.email, 'Role:', req.user?.role, 'Company:', req.user?.company);
+    
     const { status, technician, customer, startDate, endDate } = req.query;
     
     let query: any = {};
     
-    // Filter by company
-    if (req.user?.role === 'admin') {
+    // Filter by company - Admin pode ver todos da empresa
+    if (req.user?.role === 'admin' && req.user.company) {
       query.company = req.user.company;
     } else if (req.user?.role === 'technician') {
       query.technician = req.user._id;
     } else if (req.user?.role === 'customer') {
       query.customer = req.user._id;
     }
+
+    console.log('📅 Query filter:', JSON.stringify(query));
 
     // Additional filters
     if (status) query.status = status;
@@ -40,12 +44,15 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
       .populate('service', 'name category basePrice')
       .sort({ scheduledDate: 1, scheduledStartTime: 1 });
 
+    console.log('📅 Found appointments:', appointments.length);
+
     res.status(200).json({
       success: true,
       count: appointments.length,
       data: appointments
     });
   } catch (error: any) {
+    console.error('❌ Error in getAppointments:', error);
     res.status(500).json({
       success: false,
       message: error.message

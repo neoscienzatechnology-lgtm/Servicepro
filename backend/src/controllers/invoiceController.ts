@@ -11,9 +11,16 @@ interface AuthRequest extends Request {
 // @access  Private
 export const getInvoices = async (req: AuthRequest, res: Response) => {
   try {
+    console.log('💰 GET Invoices - User:', req.user?.email, 'Role:', req.user?.role, 'Company:', req.user?.company);
+    
     const { status, customer, startDate, endDate } = req.query;
     
-    let query: any = { company: req.user?.company };
+    let query: any = {};
+    
+    // Só filtrar por company se existir
+    if (req.user?.company) {
+      query.company = req.user.company;
+    }
 
     if (status) query.status = status;
     if (customer) query.customer = customer;
@@ -23,10 +30,14 @@ export const getInvoices = async (req: AuthRequest, res: Response) => {
       if (endDate) query.issueDate.$lte = new Date(endDate as string);
     }
 
+    console.log('💰 Query filter:', JSON.stringify(query));
+
     const invoices = await Invoice.find(query)
       .populate('customer', 'firstName lastName email')
       .populate('appointment')
       .sort({ issueDate: -1 });
+
+    console.log('💰 Found invoices:', invoices.length);
 
     res.status(200).json({
       success: true,
@@ -34,6 +45,7 @@ export const getInvoices = async (req: AuthRequest, res: Response) => {
       data: invoices
     });
   } catch (error: any) {
+    console.error('❌ Error in getInvoices:', error);
     res.status(500).json({
       success: false,
       message: error.message
