@@ -21,7 +21,22 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
     if (req.user?.role === 'admin' && req.user.company) {
       query.company = req.user.company;
     } else if (req.user?.role === 'technician') {
-      query.technician = req.user._id;
+      // Técnico precisa buscar pelo ID do documento Technician, não User
+      const Technician = (await import('../models/Technician')).default;
+      const technicianDoc = await Technician.findOne({ user: req.user._id });
+      
+      if (technicianDoc) {
+        console.log('📅 Técnico encontrado:', technicianDoc._id);
+        query.technician = technicianDoc._id;
+      } else {
+        console.log('📅 Técnico não encontrado para user:', req.user._id);
+        // Se não encontrar technician, retornar vazio
+        return res.status(200).json({
+          success: true,
+          count: 0,
+          data: []
+        });
+      }
     } else if (req.user?.role === 'customer') {
       query.customer = req.user._id;
     }
